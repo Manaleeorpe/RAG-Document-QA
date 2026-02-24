@@ -96,8 +96,3 @@ curl "http://127.0.0.1:8000/health"
 3. Open API docs:
    - Swagger UI: `http://127.0.0.1:8000/docs`
    - ReDoc: `http://127.0.0.1:8000/redoc`
-
-## Notes
-
-- Currently, the service validates files only by extension (`.pdf`).
-- `chunker.py` is available for future text chunking logic in the RAG pipeline.
