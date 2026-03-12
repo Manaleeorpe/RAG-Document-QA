@@ -1,4 +1,4 @@
-
+<img width="1417" height="569" alt="image" src="https://github.com/user-attachments/assets/201f9a1a-996b-452c-b60c-4804186412df" />
 A lightweight FastAPI service for uploading PDF files and extracting their text content as a first step toward a Retrieval-Augmented Generation (RAG) workflow.
 
 ## Features
@@ -41,6 +41,15 @@ RAG-Document-QA/
 - **Content-Type:** `multipart/form-data`
 - **Request Field:**
   - `file` (required): PDF file
+
+## Demo
+
+### 1. Upload a document
+<img width="1412" height="615" alt="image" src="https://github.com/user-attachments/assets/d4b81463-7cf8-48fe-9ce9-dd797b02596d" />
+
+### 2. Ask a question
+![Uploading image.png…]()
+
 
 #### Example cURL
 ```bash
