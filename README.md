@@ -1,4 +1,3 @@
-<img width="1417" height="569" alt="image" src="https://github.com/user-attachments/assets/201f9a1a-996b-452c-b60c-4804186412df" />
 A lightweight FastAPI service for uploading PDF files and extracting their text content as a first step toward a Retrieval-Augmented Generation (RAG) workflow.
 
 ## Features
