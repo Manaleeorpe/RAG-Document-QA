@@ -1,4 +1,3 @@
-<img width="1410" height="1784" alt="Architecture Diagram" src="https://github.com/user-attachments/assets/aa578d28-1a36-4b4a-b4dd-d59aa097628e" /># RAG Document Q&A API
 
 A lightweight FastAPI service for uploading PDF files and extracting their text content as a first step toward a Retrieval-Augmented Generation (RAG) workflow.
 
@@ -19,7 +18,8 @@ A lightweight FastAPI service for uploading PDF files and extracting their text 
 - **File Handling:** Python standard library (`pathlib`, `shutil`)
 
 ## Architecture Diagram 
-<img width="1410" height="1784" alt="Architecture Diagram" src="https://github.com/user-attachments/assets/14f1e9fd-97ae-4fbe-acd1-99b168110b4c" />
+<img width="679" height="710" alt="image" src="https://github.com/user-attachments/assets/2cb3ae3e-be69-4e1b-aa54-9781a2b58da2" />
+
 
 ## Project Structure
 
