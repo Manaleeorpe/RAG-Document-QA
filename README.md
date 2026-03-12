@@ -45,10 +45,11 @@ RAG-Document-QA/
 ## Demo
 
 ### 1. Upload a document
-<img width="1412" height="615" alt="image" src="https://github.com/user-attachments/assets/d4b81463-7cf8-48fe-9ce9-dd797b02596d" />
+<img width="1406" height="565" alt="image" src="https://github.com/user-attachments/assets/39cea932-2ad9-4be5-b146-4cbbce2f297b" />
+
 
 ### 2. Ask a question
-![Uploading image.png…]()
+<img width="1412" height="615" alt="image" src="https://github.com/user-attachments/assets/d4b81463-7cf8-48fe-9ce9-dd797b02596d" />
 
 
 #### Example cURL
