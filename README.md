@@ -1,4 +1,4 @@
-# RAG Document Q&A API
+<img width="1410" height="1784" alt="Architecture Diagram" src="https://github.com/user-attachments/assets/aa578d28-1a36-4b4a-b4dd-d59aa097628e" /># RAG Document Q&A API
 
 A lightweight FastAPI service for uploading PDF files and extracting their text content as a first step toward a Retrieval-Augmented Generation (RAG) workflow.
 
@@ -17,6 +17,9 @@ A lightweight FastAPI service for uploading PDF files and extracting their text 
 - **ASGI Server:** Uvicorn (recommended for local run)
 - **PDF Parsing:** PyPDF2
 - **File Handling:** Python standard library (`pathlib`, `shutil`)
+
+## Architecture Diagram 
+<img width="1410" height="1784" alt="Architecture Diagram" src="https://github.com/user-attachments/assets/14f1e9fd-97ae-4fbe-acd1-99b168110b4c" />
 
 ## Project Structure
 
