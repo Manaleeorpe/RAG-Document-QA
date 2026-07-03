@@ -11,3 +11,4 @@ app/uploads/
 
 # OS
 .DS_Store
+app/chroma_db/
