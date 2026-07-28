@@ -1,8 +1,9 @@
+import os
 import streamlit as st
 import requests
 from pathlib import Path
 
-API_URL = "http://localhost:8000"
+API_URL = os.environ.get("API_URL", "http://localhost:8000")
 
 st.set_page_config(page_title="Document Q&A", layout="centered")
 st.title("Document Q&A")
