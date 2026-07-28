@@ -8,8 +8,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Expose port
-EXPOSE 8000
+RUN chmod +x start.sh
 
-# Run with Uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Streamlit (public-facing) on 8501, FastAPI (internal) on 8000
+EXPOSE 8501
+
+CMD ["./start.sh"]
