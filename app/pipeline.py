@@ -3,10 +3,9 @@ from pathlib import Path
 from typing import Dict
 
 from dotenv import load_dotenv
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
+from calLLM import callLLM
 from chunker import chunk_documents
 from document_processor import load_pdf
 from embeddings import EmbeddingModel
@@ -37,17 +36,6 @@ class DocumentPipeline:
         # Re-rank + filter compressor, built once and reused per request.
         self.reranker = build_reranker(top_n=5)
 
-        self.prompt = ChatPromptTemplate.from_messages(
-            [
-                (
-                    "system",
-                    "You are a document Q&A assistant. Answer only from the provided "
-                    "context. Cite sources inline like [Source: name].",
-                ),
-                ("human", "Context:\n{context}\n\nQuestion: {input}"),
-            ]
-        )
-
         # Guardrail / routing / evaluation toggles.
         self.enable_input_guardrails = True
         self.enable_routing = True
@@ -76,11 +64,6 @@ class DocumentPipeline:
                 merged.append(d)
         return merged
 
-    def _generate(self, question: str, docs) -> str:
-        """Generate an answer from retrieved docs (explicit LCEL: prompt | llm | parse)."""
-        chain = self.prompt | self.llm | StrOutputParser()
-        return chain.invoke({"context": self._format_docs(docs), "input": question})
-
     def _sources(self, docs, doc_name):
         return [
             {
@@ -106,7 +89,7 @@ class DocumentPipeline:
             "status": "processed",
         }
 
-    def process_question(self, question: str, doc_name: str) -> Dict:
+    def process_question(self, question: str, doc_name: str, session_id: str) -> Dict:
         # ── Input guardrails: prompt injection (block) + PII (redact) ──
         if self.enable_input_guardrails:
             guard = run_input_guardrails(question)
@@ -169,9 +152,9 @@ class DocumentPipeline:
                 "sources": [],
             }
 
-        # ── Generate answer (LLM + retrieved context) ──
+        # ── Generate answer (LLM + retrieved context + session history) ──
         context_str = self._format_docs(docs)
-        answer = self._generate(question, docs)
+        answer = callLLM(context=context_str, question=question, session_id=session_id)
 
         # ── Output guardrail: toxicity (hard block) ──
         warnings = []
@@ -213,6 +196,7 @@ if __name__ == "__main__":
     result = pipeline.process_question(
         "What programming languages and skills are listed?",
         doc_name="Manalee_Orpe_BNPP_Resume",
+        session_id="test-session",
     )
     print(result["answer"])
     for s in result["sources"]:

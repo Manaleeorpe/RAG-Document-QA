@@ -29,6 +29,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         thread_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
         token = request_id_var.set(thread_id)
         start = time.perf_counter()
+        response = None
         try:
             response = await call_next(request)
         finally:
@@ -39,10 +40,12 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                     "latency_ms": latency_ms,
                     "method": request.method,
                     "path": request.url.path,
-                    "status_code": response.status_code,
+                    "status_code": response.status_code if response is not None else 500,
                 },
             )
             request_id_var.reset(token)
+        if response is None:
+            return JSONResponse({"detail": "Internal server error"}, status_code=500)
         response.headers["X-Request-ID"] = thread_id
         return response
 
@@ -61,6 +64,7 @@ app.add_middleware(
 class QuestionRequest(BaseModel):
     question: str
     doc_name: str
+    session_id: str
 
 
 UPLOAD_DIR = Path("uploads")
@@ -88,7 +92,7 @@ def upload_document(file: UploadFile = File(...)):
 
 @app.post("/question")
 def answer_question(request: QuestionRequest):
-    return pipeline.process_question(request.question, request.doc_name)
+    return pipeline.process_question(request.question, request.doc_name, request.session_id)
 
 
 @app.get("/health")
