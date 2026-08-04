@@ -4,13 +4,7 @@ A full-stack Retrieval-Augmented Generation (RAG) system for uploading PDF docum
 
 **Deployed on Railway:** https://rag-document-qa-production-19ff.up.railway.app
 
-<!-- DEMO VIDEO -->
-<!-- Add a demo video by uploading it to GitHub (drag-and-drop into any issue or PR comment box),  -->
-<!-- copy the generated URL, and paste it below as an mp4 tag or a linked thumbnail.              -->
-<!-- Example:                                                                                      -->
-<!--   <video src="https://github.com/user-attachments/assets/YOUR-VIDEO-ID.mp4" controls/>       -->
-<!-- Or as a linked GIF thumbnail:                                                                 -->
-<!--   [![Demo](docs/demo-thumbnail.gif)](https://github.com/user-attachments/assets/YOUR-VIDEO-ID.mp4) -->
+<video src="docs/demo.mp4" controls width="100%"></video>
 
 ---
 
@@ -30,7 +24,7 @@ A full-stack Retrieval-Augmented Generation (RAG) system for uploading PDF docum
 
 ## Architecture Diagram
 
-<img width="679" height="710" alt="Architecture diagram" src="https://github.com/user-attachments/assets/2cb3ae3e-be69-4e1b-aa54-9781a2b58da2" />
+![Architecture diagram](docs/architecture.png)
 
 ---
 
@@ -166,16 +160,11 @@ The custom `UpstashRedisSaver` in this project uses only basic Redis commands (`
 
 ### Upload a document
 
-<!-- Replace the src below with your actual screenshot URL after uploading to GitHub -->
-<!-- To upload: open any GitHub issue or PR, drag-and-drop the image, copy the generated URL -->
-<!-- Screenshot filename suggestion: docs/screenshot-upload.png -->
-<img width="1406" height="565" alt="Upload screen" src="https://github.com/user-attachments/assets/39cea932-2ad9-4be5-b146-4cbbce2f297b" />
+![Upload screen](docs/screenshot-upload.png)
 
 ### Ask a question
 
-<!-- Replace the src below with your actual screenshot URL after uploading to GitHub -->
-<!-- Screenshot filename suggestion: docs/screenshot-chat.png -->
-<img width="1412" height="615" alt="Chat screen" src="https://github.com/user-attachments/assets/d4b81463-7cf8-48fe-9ce9-dd797b02596d" />
+![Chat screen](docs/screenshot-chat.png)
 
 ---
 
