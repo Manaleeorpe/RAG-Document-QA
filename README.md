@@ -24,7 +24,7 @@ A full-stack Retrieval-Augmented Generation (RAG) system for uploading PDF docum
 
 ## Architecture Diagram
 
-![Architecture diagram](docs/architecture.png)
+<img width="679" height="710" alt="Architecture diagram" src="https://github.com/user-attachments/assets/2cb3ae3e-be69-4e1b-aa54-9781a2b58da2" />
 
 ---
 
