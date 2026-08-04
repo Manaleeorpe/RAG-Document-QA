@@ -75,9 +75,9 @@ class DocumentPipeline:
             for i, d in enumerate(docs, start=1)
         ]
 
-    def process_document(self, pdf_path: Path) -> Dict:
+    def process_document(self, pdf_path: Path, doc_name: str = None) -> Dict:
         pages = load_pdf(pdf_path)
-        doc_name = pdf_path.stem
+        doc_name = doc_name or pdf_path.stem
 
         chunks = chunk_documents(pages, doc_name)
         ids = [f"{doc_name}_{i}" for i in range(len(chunks))]
@@ -118,15 +118,11 @@ class DocumentPipeline:
                     "sources": [],
                 }
             if category == "ambiguous":
-                return {
-                    "question": question,
-                    "answer": generate_clarification(self.llm, question),
-                    "needs_clarification": True,
-                    "category": category,
-                    "sources": [],
-                }
+                # Fall back to factual retrieval so the LLM can use conversation
+                # history to resolve the reference, instead of hard-blocking.
+                category = "factual"
 
-        # ── Retrieval: hybrid search (Chroma + BM25, RRF) -> re-rank + filter ──
+        # ── Retrieval: hybrid search (Pinecone + BM25, RRF) -> re-rank + filter ──
         retriever = build_hybrid_retriever(self.vector_store, doc_name, self.reranker)
         if retriever is None:
             return {

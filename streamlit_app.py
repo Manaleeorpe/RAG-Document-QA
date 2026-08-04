@@ -9,8 +9,12 @@ API_URL = os.environ.get("API_URL", "http://localhost:8000")
 st.set_page_config(page_title="Document Q&A", layout="centered")
 st.title("Document Q&A")
 
-if "session_id" not in st.session_state:
-    st.session_state["session_id"] = str(uuid.uuid4())
+# Persist session_id in the URL so it survives page refreshes.
+# On first visit a new UUID is written to ?session_id=...; on refresh
+# the same URL is loaded and the existing ID is reused.
+if "session_id" not in st.query_params:
+    st.query_params["session_id"] = str(uuid.uuid4())
+st.session_state["session_id"] = st.query_params["session_id"]
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = []

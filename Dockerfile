@@ -10,7 +10,4 @@ COPY . .
 
 RUN chmod +x start.sh
 
-# Streamlit (public-facing) on 8501, FastAPI (internal) on 8000
-EXPOSE 8501
-
 CMD ["./start.sh"]

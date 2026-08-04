@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-import shutil
+import tempfile
 from pathlib import Path
 from openai import OpenAI, APIConnectionError
 from dotenv import load_dotenv
@@ -67,9 +67,6 @@ class QuestionRequest(BaseModel):
     session_id: str
 
 
-UPLOAD_DIR = Path("uploads")
-UPLOAD_DIR.mkdir(exist_ok=True)
-
 pipeline = DocumentPipeline()
 
 
@@ -81,12 +78,17 @@ def upload_document(file: UploadFile = File(...)):
     if not file.filename.endswith(".pdf"):
         raise HTTPException(400, "Only PDF files allowed")
 
-    file_path = UPLOAD_DIR / file.filename
-    with file_path.open("wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    content = file.file.read()
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+        tmp.write(content)
+        tmp_path = Path(tmp.name)
 
-    test_extraction(file_path)
-    result = pipeline.process_document(Path(file_path))
+    try:
+        test_extraction(tmp_path)
+        result = pipeline.process_document(tmp_path, doc_name=Path(file.filename).stem)
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
     return {"filename": file.filename, "result": result}
 
 
@@ -100,7 +102,7 @@ async def health_check():
     checks: dict = {}
     overall = "healthy"
 
-    # --- ChromaDB ---
+    # --- Pinecone ---
     try:
         stats = pipeline.vector_store.get_stats()
         checks["db"] = {"status": "connected", "total_chunks": stats["total_chunks"]}

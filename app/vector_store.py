@@ -1,62 +1,83 @@
+import os
+import time
 from typing import Dict, List
 
-from langchain_chroma import Chroma
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
+from langchain_pinecone import PineconeVectorStore
+from pinecone import Pinecone, ServerlessSpec
 
 
 class VectorStore:
     """
-    Thin wrapper around LangChain's Chroma vector store.
+    Wrapper around Pinecone via LangChain's PineconeVectorStore.
 
-    Persists to the same on-disk Chroma collection ("documents", cosine space)
-    used previously, so existing data stays queryable. Exposes the underlying
-    store via `as_retriever()` so it can plug straight into LangChain retrievers.
+    Chunks are stored in a single Pinecone index and filtered per document
+    using the `document` metadata field. An in-memory cache of raw chunks is
+    kept per-process so the BM25 retriever can be rebuilt without a round-trip
+    to Pinecone; on restart users re-upload to repopulate the cache.
     """
 
     def __init__(
         self,
         embeddings: Embeddings,
-        persist_directory: str = "./chroma_db",
-        collection_name: str = "documents",
+        index_name: str = "documents",
     ):
-        self.store = Chroma(
-            collection_name=collection_name,
-            embedding_function=embeddings,
-            persist_directory=persist_directory,
-            collection_metadata={"hnsw:space": "cosine"},  # cosine similarity
+        pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY"))
+
+        existing = [i.name for i in pc.list_indexes()]
+        if index_name not in existing:
+            pc.create_index(
+                name=index_name,
+                dimension=1536,
+                metric="cosine",
+                spec=ServerlessSpec(cloud="aws", region="us-east-1"),
+            )
+            # wait for index to be ready
+            while not pc.describe_index(index_name).status["ready"]:
+                time.sleep(1)
+
+        self.store = PineconeVectorStore(
+            index=pc.Index(index_name),
+            embedding=embeddings,
         )
+        self._index = pc.Index(index_name)
+        self._doc_chunks: Dict[str, List[Document]] = {}  # in-process cache for BM25
 
     def add_documents(self, documents: List[Document], ids: List[str]):
-        """Embed and store LangChain Documents (chunks) under explicit ids."""
         self.store.add_documents(documents=documents, ids=ids)
+        if documents:
+            doc_name = documents[0].metadata.get("document")
+            if doc_name:
+                self._doc_chunks[doc_name] = documents
         print(f"Added {len(documents)} chunks")
 
     def as_retriever(self, **kwargs):
-        """Return a LangChain retriever over this store (used by the hybrid stack)."""
         return self.store.as_retriever(**kwargs)
 
     def get_doc_chunks(self, doc_name: str) -> List[Document]:
-        """
-        Fetch every stored chunk for one document as LangChain Documents.
-
-        Needed to build the in-memory BM25 keyword index, which works over the
-        full corpus rather than just nearest-neighbour vector hits.
-        """
-        got = self.store.get(where={"document": doc_name})
-        texts = got.get("documents", []) or []
-        metas = got.get("metadatas", []) or [{} for _ in texts]
-        return [Document(page_content=t, metadata=m or {}) for t, m in zip(texts, metas)]
+        # return cached chunks if available (same process lifetime)
+        if doc_name in self._doc_chunks:
+            return self._doc_chunks[doc_name]
+        # fallback after restart: query Pinecone with metadata filter
+        results = self.store.similarity_search(
+            query=doc_name,
+            k=500,
+            filter={"document": {"$eq": doc_name}},
+        )
+        if results:
+            self._doc_chunks[doc_name] = results
+        return results
 
     def get_stats(self) -> Dict:
+        stats = self._index.describe_index_stats()
         return {
-            "total_chunks": self.store._collection.count(),
-            "collection_name": self.store._collection.name,
+            "total_chunks": stats.total_vector_count,
+            "collection_name": self._index.name if hasattr(self._index, "name") else "documents",
         }
 
 
 if __name__ == "__main__":
     from embeddings import EmbeddingModel
-
     store = VectorStore(EmbeddingModel().embeddings)
     print(store.get_stats())

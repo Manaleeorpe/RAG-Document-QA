@@ -4,15 +4,18 @@ from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 from langgraph.graph import StateGraph, MessagesState, START, END
-from langgraph.checkpoint.memory import InMemorySaver
+from redis_checkpointer import UpstashRedisSaver
 
 load_dotenv()
 
 WINDOW_SIZE = 6  # last 6 messages = 3 turns
 
 _SYSTEM = (
-    "You are a document Q&A assistant. Answer only from the provided context. "
-    "Cite sources like [Source: name]."
+    "You are a document Q&A assistant. Answer from the provided document context "
+    "and the conversation history. For follow-up questions, use the conversation "
+    "history to understand what the user is referring to. Do not invent facts not "
+    "present in the document context or the conversation. "
+    "Cite sources like [Source: name] when referencing the document."
 )
 
 _llm = ChatOpenAI(
@@ -29,7 +32,10 @@ def _call_model(state: MessagesState):
     return {"messages": [response]}
 
 
-_checkpointer = InMemorySaver()
+_checkpointer = UpstashRedisSaver.from_url(
+    os.environ.get("REDIS_URL", "redis://localhost:6379"),
+    ttl=86400,  # 24 hours in seconds, refreshed on every read/write
+)
 
 _builder = StateGraph(MessagesState)
 _builder.add_node("model", _call_model)
